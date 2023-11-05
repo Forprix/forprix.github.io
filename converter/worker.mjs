@@ -1,0 +1,1 @@
+postMessage(null),onmessage=s=>{console.log(s)};
