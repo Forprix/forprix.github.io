@@ -395,31 +395,54 @@ const [seed, random] = (() => {
 })()
 
 
+requestAnimationFrame = cb => setTimeout(cb, 1000 / 160)
+
+
+
 let tOld = performance.now() / 1000
+let tOld2 = performance.now() / 1000
 ;(async () => {
     let img_p = loadImage('vignette.png')
 
     const ctx = canvas1.getContext('2d')
     const ctx2 = canvas2.getContext('2d')
 
-    function render() {
+    // Задний фон ускоряется до бесконечности
+    // Очень медленно убирается свечение
+    // Поворачивается очень медленно
 
+    let cntr = 0
+    function startRendering(cb) {
+        const cb_ = () => {
+            const tNew2 = performance.now() / 1000
+            const dt = tNew2 - tOld2
+            tOld2 = tNew2
+            cntr += dt
+            while (cntr > (1 / 60)) {
+                cntr -= 1 / 60
+                cb()
+            }
+            setTimeout(cb_, ((1 / 60) - cntr) * 1000)
+            // cb()
+            // requestAnimationFrame(cb_)
+        }
+        cb_()
+        // cb_()
+    }
+    
+    function render() {
         let tNew = performance.now() / 1000
         const dt = tNew - tOld
-
         raisingt += raisingt_speed * dt
-        
         ctx.globalAlpha = 1
         ctx.fillStyle = '#2a2d30'
         ctx.fillRect(0, 0, canvas1.width, canvas1.height)
-
         const n1 = [50, 92]
         const n2 = [40, 100]
         const n3 = [60, 85]
         const n4 = [60, 85]
         const n5 = [60, 75]
         function drawFlatColor(ctx, x, y, hsv, scale, rotation) {
-
             ctx.fillStyle = rgb2css(hsv2rgb(hsv))
             ctx.beginPath()
             ctx.moveTo(...rotate(x - blockSize / 2 * scale, y - blockSize / 2 * scale, x, y, rotation))
@@ -429,15 +452,13 @@ let tOld = performance.now() / 1000
             ctx.closePath()
             ctx.fill()
         }
-
         function drawBlock(ctx, x, y, color, rotation) {
             const [x_, y_] = [x - blockSize / 2, y - blockSize / 2]
-
             // const center = {
             //     x: x_ + blockSize / 2,
             //     y: y_ + blockSize / 2,
             // }
-    
+
             const hsv1 = [...color]
             const hsv = [...hsv1]
             hsv[1] = hsv1[1] * (n1[0] / 100)
@@ -503,7 +524,6 @@ let tOld = performance.now() / 1000
                 drawBlock(ctx, x + offset.x * blockSize, y + offset.y * blockSize, color, rotation)
             }
         }
-
         const t0 = performance.now()
         const d = 10
         const td = Math.floor(t0 * d) / d
@@ -514,8 +534,6 @@ let tOld = performance.now() / 1000
         impactCounter2 += (1 - impactCounter2) * Math.min(1, impactCounter2_d ** (1 / dt))
         impactCounter3 += (1 - impactCounter3) * Math.min(1, 0.97 ** (1 / dt))
         raisingt_speed += (1 - raisingt_speed) * Math.min(1, 0.94 ** (1 / dt))
-
-        
         for (let y_ = -1; y_ < worldHeight; ++y_)
             for (let x_ = 0; x_ < worldWidth; ++x_) {
                 let x = (x_ + 0.5) * blockSize
@@ -523,10 +541,7 @@ let tOld = performance.now() / 1000
                 const yoffset = (raisingt * blockSize) % blockSize
                 drawBlock(ctx, x, y + yoffset, [210, 12, 14], 0)
             }
-        
-        
         ctx.drawImage(img_p, 0, 0, canvas1.width, canvas1.height)
-
         for (let y_ = 0; y_ < worldHeight; ++y_)
             for (let x_ = 0; x_ < worldWidth; ++x_) {
                 const v = world[y_ * worldWidth + x_]
@@ -540,7 +555,6 @@ let tOld = performance.now() / 1000
                     hsv[0] = ((performance.now() / 1000 * 180) % 360)
                 drawFlatColor(ctx, x, y, hsv, impactCounter2, 0)
             }
-            
         for (let y_ = 0; y_ < worldHeight; ++y_)
             for (let x_ = 0; x_ < worldWidth; ++x_) {
                 const v = world[y_ * worldWidth + x_]
@@ -551,8 +565,6 @@ let tOld = performance.now() / 1000
                 hsv[1] *= impactCounter3
                 drawBlock(ctx, x, y, hsv, 0)
             }
-        
-
         if (currentFigure != null) {
             currentFigurePos = {
                 x: currentFigurePos.x + ((currentFigure.shape[0].x - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].x) - currentFigurePos.x) * Math.min(1, 0.99 ** (1 / dt)),
@@ -560,11 +572,8 @@ let tOld = performance.now() / 1000
             }
             currentFigureRotation *= Math.min(1, 0.984 ** (1 / dt))
             currentFigureRotation2 *= Math.min(1, 0.995 ** (1 / dt))
-
             const rot = currentFigureRotation * 90 + currentFigureRotation2
             const blocks = randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation]
-
-            
             drawShape(
                 ctx,
                 blocks,
@@ -574,7 +583,6 @@ let tOld = performance.now() / 1000
                 rot
             )
         }
-
         ctx2.fillStyle = '#2a2d30'
         ctx2.fillRect(0, 0, canvas2.width, canvas2.height)
         if (nextFigureShapeIndex != null) {
@@ -587,9 +595,7 @@ let tOld = performance.now() / 1000
                 randomFigureCenters[nextFigureShapeIndex][0],
                 0
             )
-
         }
-
         ctx.fillStyle = 'white'
         for (const p of particles) {
             p.position.x += p.velocity.x * dt
@@ -608,7 +614,6 @@ let tOld = performance.now() / 1000
                     ctx.globalAlpha = Math.max(0, 1 - progress)
                 }
             }
-
             switch (p.type) {
                 case 'image':
                     ctx.save()
@@ -631,11 +636,7 @@ let tOld = performance.now() / 1000
             }
         }
         particles = particles.filter(x => x.lifetime < (x.timeToLive + x.timeToDisappear))
-
-
-
         tOld = tNew
-        requestAnimationFrame(render)
     }
 
 
@@ -735,7 +736,7 @@ let tOld = performance.now() / 1000
         canvas1.classList.remove('hidden')
         canvas2.classList.remove('hidden')
         document.querySelector('.welcoming-message').classList.add('hidden')
-        render()
+        startRendering(render)
 
         audioContext = new AudioContext
     
