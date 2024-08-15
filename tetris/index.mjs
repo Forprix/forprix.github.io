@@ -15,6 +15,10 @@ const normalizeUrl = (() => {
     return url => (a.href = url, a.href)
 })()
 
+function lerp(a, b, t) {
+    return a + (b - a) * t
+}
+
 const AsyncMap = function() {
     const map = new Map
     const r = {
@@ -358,7 +362,7 @@ let currentFigureRotation = null
 let currentFigureRotation2 = 0
 let impactCounter = 0
 let impactCounter2 = 0
-let impactCounter2_d = 0.95
+let impactCounter2_d 
 let impactCounter3 = 0
 let outlineMode = 0
 let raisingt = 0
@@ -411,23 +415,23 @@ let tOld2 = performance.now() / 1000
     // Очень медленно убирается свечение
     // Поворачивается очень медленно
 
-    let cntr = 0
+    // let cntr = 0
     function startRendering(cb) {
         const cb_ = () => {
-            const tNew2 = performance.now() / 1000
-            const dt = tNew2 - tOld2
-            tOld2 = tNew2
-            cntr += dt
-            while (cntr > (1 / 60)) {
-                cntr -= 1 / 60
-                cb()
-            }
-            setTimeout(cb_, ((1 / 60) - cntr) * 1000)
-            // cb()
-            // requestAnimationFrame(cb_)
+            // const tNew2 = performance.now() / 1000
+            // const dt = tNew2 - tOld2
+            // tOld2 = tNew2
+            // cntr += dt
+            // if (cntr > (1 / 200)) {
+            //     cntr = cntr % (1 / 200)
+            //     cb()
+            // }
+            // setTimeout(cb_, ((1 / 200) - cntr) * 1000)
+            cb()
+            requestAnimationFrame(cb_)
         }
-        cb_()
         // cb_()
+        cb_()
     }
     
     function render() {
@@ -530,10 +534,12 @@ let tOld2 = performance.now() / 1000
         seed(td)
         const shakedx = (Math.floor(impactCounter * d) / d) * (random() * 2 - 1) * 15
         const shakedy = (Math.floor(impactCounter * d) / d) * (random() * 2 - 1) * 15
-        impactCounter *= Math.min(1, 0.995 ** (1 / dt))
-        impactCounter2 += (1 - impactCounter2) * Math.min(1, impactCounter2_d ** (1 / dt))
-        impactCounter3 += (1 - impactCounter3) * Math.min(1, 0.97 ** (1 / dt))
-        raisingt_speed += (1 - raisingt_speed) * Math.min(1, 0.94 ** (1 / dt))
+        
+        impactCounter = lerp(impactCounter, 0, 1 - 0.00025 ** dt)
+        impactCounter2 = lerp(impactCounter2, 1, 1 - impactCounter2_d ** dt)
+        impactCounter3 = lerp(impactCounter3, 1, 1 - 0.001 ** dt)
+        raisingt_speed = lerp(raisingt_speed, 1, 1 - 0.05 ** dt)
+
         for (let y_ = -1; y_ < worldHeight; ++y_)
             for (let x_ = 0; x_ < worldWidth; ++x_) {
                 let x = (x_ + 0.5) * blockSize
@@ -567,11 +573,11 @@ let tOld2 = performance.now() / 1000
             }
         if (currentFigure != null) {
             currentFigurePos = {
-                x: currentFigurePos.x + ((currentFigure.shape[0].x - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].x) - currentFigurePos.x) * Math.min(1, 0.99 ** (1 / dt)),
-                y: currentFigurePos.y + ((currentFigure.shape[0].y - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].y) - currentFigurePos.y) * Math.min(1, 0.99 ** (1 / dt)),
+                x: lerp(currentFigurePos.x, currentFigure.shape[0].x - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].x, 1 - 0.0000001 ** dt),
+                y: lerp(currentFigurePos.y, currentFigure.shape[0].y - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].y, 1 - 0.0000001 ** dt)
             }
-            currentFigureRotation *= Math.min(1, 0.984 ** (1 / dt))
-            currentFigureRotation2 *= Math.min(1, 0.995 ** (1 / dt))
+            currentFigureRotation = lerp(currentFigureRotation, 0, 1 - 0.000000000000001 ** dt)
+            currentFigureRotation2 = lerp(currentFigureRotation2, 0, 1 - 0.0000000001 ** dt)
             const rot = currentFigureRotation * 90 + currentFigureRotation2
             const blocks = randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation]
             drawShape(
@@ -846,14 +852,14 @@ let tOld2 = performance.now() / 1000
                         if (lc > 0) {
                             raisingt_speed += 10
                             outlineMode = 1
-                            impactCounter2_d = 0.94
+                            impactCounter2_d = 0.2
                             impactCounter2 = 1.7
                             playSound('beep3.wav', { pitch: Math.random() + 0.85 })
                         }
                         else {
                             raisingt_speed += 1
                             outlineMode = 0
-                            impactCounter2_d = 0.95
+                            impactCounter2_d = 0.0003
                             impactCounter2 = 1.5
                         }
                         currentFigure = null
