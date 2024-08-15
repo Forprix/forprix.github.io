@@ -573,8 +573,8 @@ let tOld2 = performance.now() / 1000
             }
         if (currentFigure != null) {
             currentFigurePos = {
-                x: lerp(currentFigurePos.x, currentFigure.shape[0].x - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].x, 1 - 0.0000001 ** dt),
-                y: lerp(currentFigurePos.y, currentFigure.shape[0].y - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].y, 1 - 0.0000001 ** dt)
+                x: lerp(currentFigurePos.x, currentFigure.shape[0].x - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].x, 1 - 0.0000000000001 ** dt),
+                y: lerp(currentFigurePos.y, currentFigure.shape[0].y - randomFigureShapes[currentFigure.shapeIndex][currentFigure.rotation][0].y, 1 - 0.0000000000001 ** dt)
             }
             currentFigureRotation = lerp(currentFigureRotation, 0, 1 - 0.000000000000001 ** dt)
             currentFigureRotation2 = lerp(currentFigureRotation2, 0, 1 - 0.0000000001 ** dt)
