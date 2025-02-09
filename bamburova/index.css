@@ -1,14 +1,14 @@
 @font-face {
   font-family: 'Saira';
-  src: url("./assets/Saira.ttf");
+  src: url("../assets/Saira.ttf");
 }
 @font-face {
   font-family: 'Roboto';
-  src: url("./assets/roboto.ttf");
+  src: url("../assets/roboto.ttf");
 }
 @font-face {
   font-family: 'RobotoThin';
-  src: url("./assets/roboto-thin.ttf");
+  src: url("../assets/roboto-thin.ttf");
 }
 * {
   margin: 0;
