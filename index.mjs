@@ -1,14 +1,8 @@
 import { $, $1, $el, $url } from './util.mjs'
-import { send, setHandler, setRemoteTarget } from './util/communication.mjs'
-
-const client = supabase.createClient(
-    'https://fmpyiquamzzzzwwrqzvh.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtcHlpcXVhbXp6enp3d3JxenZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcyNTEzNTYsImV4cCI6MjAyMjgyNzM1Nn0.5WVOpRXqtgeZ3HXRtTVNdLQ4tRLLpbZdfm5b5PNWkas'
-)
 
 // const client = supabase.createClient(
-//     'https://slhjhcwpdvfawqpfogec.supabase.co',
-//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsaGpoY3dwZHZmYXdxcGZvZ2VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQzNzcyNTYsImV4cCI6MjAzOTk1MzI1Nn0.pyOdPXew6xHPxa6daUV__df_BqcuGbhwnRpH_xXslGs'
+//     'https://fmpyiquamzzzzwwrqzvh.supabase.co',
+//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtcHlpcXVhbXp6enp3d3JxenZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcyNTEzNTYsImV4cCI6MjAyMjgyNzM1Nn0.5WVOpRXqtgeZ3HXRtTVNdLQ4tRLLpbZdfm5b5PNWkas'
 // )
 
 const iframe = $1('.body > .body-iframe')
@@ -29,8 +23,6 @@ let pages
 const switchBodyPage = (() => {
     const headerTitleEl = $1('.header-title')
     const menuTitleEl = $1('.menu-title-text')
-
-    setRemoteTarget(iframe.contentWindow || iframe.contentDocument.defaultView)
 
     iframe.addEventListener('load', () => {
         const win = iframe.contentWindow || iframe.contentDocument.defaultView
@@ -72,56 +64,6 @@ const switchBodyPage = (() => {
         })
     }
 })()
-
-setHandler('login', async msg => {
-    const params = { }
-    if (msg?.redirect != null)
-        params.redirect = msg.redirect
-    else
-        params.redirect = new URL($url(iframe.src)).pathname.replace(/(^\/|\/$)/g, '')
-    switchBodyPage('/login', '' + new URLSearchParams(params))
-    await new Promise(()=>{})
-})
-
-setHandler('test', async () => {
-    console.log('user', await client.auth.getUser())
-    console.log('session', await client.auth.getSession())
-    console.log('userIdentities', await client.auth.getUserIdentities())
-    console.log('updateUser', await client.auth.updateUser())
-    console.log('auth', client.auth)
-})
-setHandler('replaceLocation', async location => {
-    window.location.href = $url(location)
-    return Promise(()=>{})
-})
-setHandler('getUser', async () => {
-    return await client.auth.getUser()
-})
-setHandler('getSession', async () => {
-    return await client.auth.getSession()
-})
-setHandler('signUp', async msg => {
-    const arg = {
-        email: msg.email,
-        password: msg.password,
-    }
-    if (msg.redirect != null) arg.redirectTo = msg.redirect
-    return await client.auth.signUp(arg)
-})
-setHandler('signIn', async msg => {
-    return await client.auth.signInWithPassword({
-        email: msg.email,
-        password: msg.password
-    })
-
-})
-setHandler('signInWithOAuth', async msg => {
-    const arg = { provider: msg.provider }
-    if (msg.redirect != null) {
-        arg.options = { redirectTo: msg.redirect }
-    }
-    return await client.auth.signInWithOAuth(arg)
-})
 
 
 // Locations
